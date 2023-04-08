@@ -1,0 +1,43 @@
+################ konfigurasi raid 1 ################
+1. cek partisi yang termount
+$ df -h 
+$ lsblk
+
+pastikan ada sdb & sdc
+
+2. membuat label partisi
+$ parted --script /dev/sdb "mklabel gpt"
+$ parted --script /dev/sdc "mklabel gpt"
+$ parted --script /dev/sdb "mkpart primary 0% 100%"
+$ parted --script /dev/sdc "mkpart primary 0% 100%"
+$ parted --script /dev/sdb "set 1 raid on"
+$ parted --script /dev/sdc "set 1 raid on"
+
+3. install mdadm
+$ yum install mdadm
+$ mdadm --create /dev/md0 --level=raid1 --raid-devices=2 /dev/sdb1 /dev/sdc1
+$ cat /proc/mdstat
+
+
+5. format
+
+$ mkfs.xfs /dev/md0
+$ mkdir /media/raid1
+
+$ mount /dev/md0 /media/raid1
+
+$ chmod 777 /media/raid1
+
+pastikan ada folder raid 1 yang sudah termounting 
+
+$ df -ha
+
+cara agar mountingan tidak hiilang ketika di reboot
+
+$ vim /etc/fstab
+
+/dev/md0 /media/raid1 xfs defaults 0 0
+
+$ reboot
+
+isi folder raid1 lalu coba copot salah satu hdd mau itu sdb atau sdc, lalu cek apakah filenya hilang
